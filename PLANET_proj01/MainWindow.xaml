@@ -1,0 +1,40 @@
+﻿<Window x:Class="PLANET_proj01.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PLANET_proj01"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Save" Click="SaveState"/>
+                <MenuItem Header="Load" Click="LoadState" />
+            </MenuItem>
+        </Menu>
+        <Grid>
+            <Grid Margin="200,0,0,0" Width="600" Height="400" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Column="1">
+                <Border BorderBrush="Black" BorderThickness="1"></Border>
+                <Grid Name="mainContainer" Width="600" Height="400" VerticalAlignment="Top" HorizontalAlignment="Left" Background="Transparent" PreviewMouseLeftButtonUp="SpawnCell">
+
+                </Grid>
+            </Grid>
+            <!--Tick-->
+            <Button Content="Tick" HorizontalAlignment="Left" Margin="10,32,0,0" VerticalAlignment="Top" Height="26" Width="100" Click="Tick"/>
+            <!--Animate-->
+            <TextBox Name="times" Text="0" HorizontalAlignment="Left" Margin="10,92,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" PreviewTextInput="MakeTextBoxNumberOnly" Grid.ColumnSpan="2"/>
+            <TextBox Name="speed" Text="100"  HorizontalAlignment="Left" Margin="10,140,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" PreviewTextInput="MakeTextBoxNumberOnly" Grid.ColumnSpan="2"/>
+            <Button Content="Animate" HorizontalAlignment="Left" Margin="10,164,0,0" VerticalAlignment="Top" Height="24" Width="120" Click="Animate" Grid.ColumnSpan="2"/>
+            <Label Content="How many times:" HorizontalAlignment="Left" Margin="10,66,0,0" VerticalAlignment="Top"/>
+            <Label Content="How fast:" HorizontalAlignment="Left" Margin="11,115,0,0" VerticalAlignment="Top"/>
+            <!--Follow-->
+            <CheckBox Content="Folow Camera" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+            <!--Reset-->
+            <Button Name="Reset" Content="Reset" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="120" Height="25" Click="Reset_Click" Grid.ColumnSpan="2"/>
+            <TextBox HorizontalAlignment="Left" Margin="10,0,0,40" Text="25" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="120" Height="21" PreviewTextInput="MakeTextBoxNumberOnly"/>
+            <Label Content="Scale" HorizontalAlignment="Left" Margin="11,0,0,61" VerticalAlignment="Bottom" Width="119"/>
+        </Grid>
+    </DockPanel>
+</Window>
