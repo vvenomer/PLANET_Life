@@ -1,34 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace PLANET_proj01.Life
 {
-    class Cell
+    internal class Cell
     {
         public (int x, int y) pos { get; set; }
         public CellState state { get; private set; }
         public bool born { get; private set; } = true;
         public bool endangered { get; private set; }
 
-        int alive = 0;
-        Cell[,] neighbours;
+        private int alive = 0;
+        private Cell[,] neighbours;
 
-        CellState futureState;
+        private CellState futureState;
 
-        List<int> BornCondt = new List<int>() { 3 };
-        List<int> DeadCondt = new List<int>() { 0, 1, 4, 5, 6, 7, 8 };
-        int dieWhenAliveFor = -1;
-
-
+        private int dieWhenAliveFor = -1;
 
         public Cell()
         {
             state = CellState.Alive;
         }
 
-        public void ChangeState(IEnumerable<Cell> allCells)
+        public void ChangeState(IEnumerable<Cell> allCells, List<int> BornCondt, List<int> DeadCondt)
         {
             var aliveNeighbours = SetNeighbours(allCells);
             if (state == CellState.Dead && BornCondt.Contains(aliveNeighbours))
@@ -48,7 +41,7 @@ namespace PLANET_proj01.Life
             else born = false;
         }
 
-        public void SetEndangeredState(IEnumerable<Cell> allCells)
+        public void SetEndangeredState(IEnumerable<Cell> allCells, List<int> BornCondt, List<int> DeadCondt)
         {
             var aliveNeighbours = SetNeighbours(allCells);
             if (state == CellState.Alive && (DeadCondt.Contains(aliveNeighbours) || dieWhenAliveFor == alive + 1))
@@ -57,7 +50,6 @@ namespace PLANET_proj01.Life
             }
             else
                 endangered = false;
-
         }
 
         public void UpdateState()
@@ -81,7 +73,7 @@ namespace PLANET_proj01.Life
             return deadCells;
         }
 
-        int SetNeighbours(IEnumerable<Cell> allCells)
+        private int SetNeighbours(IEnumerable<Cell> allCells)
         {
             int found = 0;
             neighbours = new Cell[3, 3];

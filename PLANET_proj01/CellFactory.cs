@@ -1,45 +1,106 @@
 ﻿using PLANET_proj01.Life;
+using PLANET_proj01.UserControlls;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
 namespace PLANET_proj01
 {
-    class CellFactory
+    internal class CellFactory
     {
-        int size;
-        public CellFactory(int size)
+        public bool ColorBorn { get; set; } = true;
+        public bool ColorEndangered { get; set; } = true;
+        public Type Type { get; set; } = Type.Rect;
+        private Func<int> GetScale;
+        private Func<(int w, int h)> GetSize;
+
+        public CellFactory(Func<int> GetScale, Func<(int w, int h)> GetSize)
         {
-            this.size = size;
+            this.GetScale = GetScale;
+            this.GetSize = GetSize;
         }
 
-        public Rectangle GetRectangle(Cell cell, (int x, int y) offset)
+        public bool IsWithinBounds(Cell cell)
         {
-            var rect = new Rectangle();
+            var size = GetSize();
+            return cell.pos.x <= size.w && cell.pos.y <= size.h && cell.pos.x >= 0 && cell.pos.y >= 0;
+        }
+
+        public UIElement GetRectangle(Cell cell, (int x, int y) offset)
+        {
+            Rect rect;
+            switch(Type)
+            {
+                case Type.Img1:
+                    rect = (Rect)new CellImage1();
+                    break;
+                case Type.Img2:
+                    rect = (Rect)new CellImage2();
+                    break;
+                default:
+                    rect = (Rect)new myRect();
+                    break;
+            }
             if (cell.state == CellState.Alive)
             {
-                if (cell.born)
+                if (ColorBorn && cell.born)
                     rect.Fill = new SolidColorBrush(Colors.Green);
                 else
                     rect.Fill = new SolidColorBrush(Colors.Blue);
 
-                if(cell.endangered)
+                if (ColorEndangered && cell.endangered)
                 {
                     rect.Stroke = new SolidColorBrush(Colors.Red);
+                    rect.StrokeThickness = 2;
                 }
             }
+            int scale = GetScale();
+            rect.Width = rect.Height = scale;
 
-            rect.Width = rect.Height = size;
-
-            rect.Margin = new Thickness(cell.pos.x * size + offset.x, cell.pos.y * size + offset.y, 0, 0);
+            rect.Margin = new Thickness(cell.pos.x * scale + offset.x, cell.pos.y * scale + offset.y, 0, 0);
 
             rect.HorizontalAlignment = HorizontalAlignment.Left;
             rect.VerticalAlignment = VerticalAlignment.Top;
 
-            return rect;
+            return rect.GetMe();
         }
+    }
+
+    class myRect : Rect
+    {
+        Rectangle Rectangle = new Rectangle();
+
+        public Brush Fill { set => Rectangle.Fill = value; }
+        public Brush Stroke { set => Rectangle.Stroke = value; }
+        public int StrokeThickness { set => Rectangle.StrokeThickness = value; }
+        public double Width { set => Rectangle.Width = value; }
+        public double Height { set => Rectangle.Height = value; }
+        public Thickness Margin { set => Rectangle.Margin = value; }
+        public HorizontalAlignment HorizontalAlignment { set => Rectangle.HorizontalAlignment = value; }
+        public VerticalAlignment VerticalAlignment { set => Rectangle.VerticalAlignment = value; }
+        public UIElement GetMe()
+        {
+            return Rectangle;
+        }
+    }
+    enum Type
+    {
+        Rect,
+        Img1,
+        Img2
+    }
+
+    interface Rect
+    {
+        Brush Fill { set; }
+        Brush Stroke { set; }
+        int StrokeThickness { set; }
+        double Width { set; }
+        double Height { set; }
+        Thickness Margin { set; }
+        HorizontalAlignment HorizontalAlignment { set; }
+        VerticalAlignment VerticalAlignment { set; }
+        UIElement GetMe();
     }
 }

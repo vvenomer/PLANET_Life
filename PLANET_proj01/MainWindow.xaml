@@ -4,37 +4,68 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PLANET_proj01"
+        xmlns:localTemplates="clr-namespace:PLANET_proj01.Template"
+        xmlns:localUC="clr-namespace:PLANET_proj01.UserControlls"        
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="500" Width="900">
+    <Window.Resources>
+        <Style TargetType="Label">
+            <Setter Property="FontFamily" Value="Times New Roman"/>
+        </Style>
+        <DataTemplate DataType="{x:Type localTemplates:AnimateParamsTemplate}">
+            <Grid>
+                <Label Content="{Binding timesText}" HorizontalAlignment="Left" Margin="10,66,0,0" VerticalAlignment="Top" />
+                <Label Content="{Binding speedText}" HorizontalAlignment="Left" Margin="11,115,0,0" VerticalAlignment="Top" />
 
+                <TextBox Name="times" Text="{Binding times}" HorizontalAlignment="Left" Margin="10,92,0,0" VerticalAlignment="Top" Width="120" PreviewTextInput="MakeTextBoxNumberOnly" />
+                <TextBox Name="speed" Text="{Binding speed}"  HorizontalAlignment="Left" Margin="10,140,0,0" VerticalAlignment="Top" Width="120" PreviewTextInput="MakeTextBoxNumberOnly" />
+            </Grid>
+        </DataTemplate>
+        <localTemplates:AnimateParamsTemplate x:Key="param" timesText="How many times:" times="0" speedText="How fast:" speed="100"/>
+    </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
-                <MenuItem Header="Save" Click="SaveState"/>
+                <MenuItem Header="Save" Click="SaveState" />
                 <MenuItem Header="Load" Click="LoadState" />
+            </MenuItem>
+            <MenuItem Header="Init">
+                <MenuItem Header="Preset1" Click="GeneretePreset1" />
+                <MenuItem Header="Random" Click="GenerateRandomCells" />
+            </MenuItem>
+            <MenuItem Header="View">
+                <MenuItem Header="Highlight endangered" Click="TurnHighlightOnOff" />
+                <MenuItem Header="Color new cells" Click="TurnColorOnOff" />
+            </MenuItem>
+            <MenuItem Header="Cell">
+                <MenuItem Header="Rect" Click="SetCellRect"/>
+                <MenuItem Header="Img1" Click="SetCellImg1"/>
+                <MenuItem Header="Img2" Click="SetCellImg2"/>
             </MenuItem>
         </Menu>
         <Grid>
-            <Grid Margin="200,0,0,0" Width="600" Height="400" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Column="1">
+            <Grid Margin="200,0,0,0" Width="{Binding Path=Text, ElementName=width}" Height="{Binding Path=Text, ElementName=height}" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="1">
                 <Border BorderBrush="Black" BorderThickness="1"></Border>
-                <Grid Name="mainContainer" Width="600" Height="400" VerticalAlignment="Top" HorizontalAlignment="Left" Background="Transparent" PreviewMouseLeftButtonUp="SpawnCell">
-
+                <Grid Name="mainContainer" Width="{Binding Path=Text, ElementName=width}" Height="{Binding Path=Text, ElementName=height}" VerticalAlignment="Top" HorizontalAlignment="Right" Background="Transparent" PreviewMouseLeftButtonUp="SpawnCell">
                 </Grid>
             </Grid>
             <!--Tick-->
-            <Button Content="Tick" HorizontalAlignment="Left" Margin="10,32,0,0" VerticalAlignment="Top" Height="26" Width="100" Click="Tick"/>
+            <Button Content="Tick" HorizontalAlignment="Left" Margin="10,32,0,0" VerticalAlignment="Top" Height="26" Width="100" Click="Tick" />
             <!--Animate-->
-            <TextBox Name="times" Text="0" HorizontalAlignment="Left" Margin="10,92,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" PreviewTextInput="MakeTextBoxNumberOnly" Grid.ColumnSpan="2"/>
-            <TextBox Name="speed" Text="100"  HorizontalAlignment="Left" Margin="10,140,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" PreviewTextInput="MakeTextBoxNumberOnly" Grid.ColumnSpan="2"/>
-            <Button Content="Animate" HorizontalAlignment="Left" Margin="10,164,0,0" VerticalAlignment="Top" Height="24" Width="120" Click="Animate" Grid.ColumnSpan="2"/>
-            <Label Content="How many times:" HorizontalAlignment="Left" Margin="10,66,0,0" VerticalAlignment="Top"/>
-            <Label Content="How fast:" HorizontalAlignment="Left" Margin="11,115,0,0" VerticalAlignment="Top"/>
+            <ContentControl Name="animateControls" Content="{StaticResource param}"/>
+            <Button Content="Animate" HorizontalAlignment="Left" Margin="10,164,0,0" VerticalAlignment="Top" Height="24" Width="120" Click="Animate" Grid.ColumnSpan="2" />
             <!--Follow-->
-            <CheckBox Content="Folow Camera" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+            <CheckBox Content="Folow Camera" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked" />
             <!--Reset-->
-            <Button Name="Reset" Content="Reset" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="120" Height="25" Click="Reset_Click" Grid.ColumnSpan="2"/>
-            <TextBox HorizontalAlignment="Left" Margin="10,0,0,40" Text="25" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="120" Height="21" PreviewTextInput="MakeTextBoxNumberOnly"/>
-            <Label Content="Scale" HorizontalAlignment="Left" Margin="11,0,0,61" VerticalAlignment="Bottom" Width="119"/>
+            <Button Name="Reset" Content="Reset" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="120" Height="25" Click="Reset_Click" Grid.ColumnSpan="2" />
+            <TextBox Name="scale" HorizontalAlignment="Left" Margin="10,0,0,40" Text="25" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="120" Height="21" PreviewTextInput="MakeTextBoxNumberOnly" TextChanged="UpdateUI" />
+            <Label Content="Scale" HorizontalAlignment="Left" Margin="11,0,0,61" VerticalAlignment="Bottom" Width="119" />
+            <TextBox Name="width" HorizontalAlignment="Left" Margin="11,361,0,0" Text="600" TextWrapping="Wrap" VerticalAlignment="Top" Width="59"  PreviewTextInput="MakeTextBoxNumberOnly" />
+            <TextBox Name="height" HorizontalAlignment="Left" Margin="70,361,0,0" Text="400" TextWrapping="Wrap" VerticalAlignment="Top" Width="59"  PreviewTextInput="MakeTextBoxNumberOnly" />
+
+            <TextBox Name="bornCondt"  HorizontalAlignment="Left" Margin="71,193,0,0" Text="3" TextWrapping="Wrap" VerticalAlignment="Top" Width="60"/>
+            <TextBox Name="deadCondt" HorizontalAlignment="Left" Margin="11,193,0,0" Text="0, 1, 4, 5, 6, 7, 8" TextWrapping="Wrap" VerticalAlignment="Top" Width="60"/>
+            <Button Content="Update Conditions" HorizontalAlignment="Left" Margin="10,233,0,0" VerticalAlignment="Top" Width="119" Click="UpdateCondt"/>
         </Grid>
     </DockPanel>
 </Window>

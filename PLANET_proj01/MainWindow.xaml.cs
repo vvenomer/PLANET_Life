@@ -1,4 +1,5 @@
 ﻿using PLANET_proj01.Life;
+using PLANET_proj01.Template;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shapes;
 
@@ -16,48 +18,38 @@ namespace PLANET_proj01
     /// </summary>
     public partial class MainWindow : Window
     {
-        double populationPercentage = 0.3;
-        int cellSize = 25;
-        string baseTitle = "Game of Life";
-        GameOfLife game;
-        CellFactory factory;
-        public ObservableCollection<Rectangle> rectangles = new ObservableCollection<Rectangle>();
-        bool animationRunning = false;
-        bool followCamera = false;
-        (int x, int y) mainContainerPos = (0, 0);
-        (int w, int h) mainContainerSize;
-        List<(int x, int y)> startPositions;
-        public MainWindow()
+        private double populationPercentage = 0.3;
+
+        private int cellSize
         {
-            InitializeComponent();
-            mainContainerSize.w = (int)mainContainer.Width / cellSize;
-            mainContainerSize.h = (int)mainContainer.Height / cellSize;
-            var rand = new Random();
-            var numberOfAliveCells = (int)((mainContainerSize.w * mainContainerSize.h) * populationPercentage * rand.NextDouble());
-            startPositions = new List<(int x, int y)>()
-            {
-                (5,5),
-                (5,6),
-                (5,4),
-                (4,5),
-                (6,5)
-            };
-            /*for (int i = 0; i < numberOfAliveCells; i++)
-            {
-                (int x, int y) pos;
-                do
-                {
-                    pos = (x: rand.Next(mainContainerSize.w), y: rand.Next(mainContainerSize.h));
-                }
-                while (startPositions.Contains(pos));
-                startPositions.Add(pos);
-            }*/
-            game = new GameOfLife(startPositions);
-            factory = new CellFactory(cellSize);
-            UpdateUI();
+            get { return scale.Text == "" ? 1 : int.Parse(scale.Text); }
         }
 
-        void UpdateUI()
+        private string baseTitle = "Game of Life";
+        private GameOfLife game;
+        private CellFactory factory;
+        public ObservableCollection<Rectangle> rectangles = new ObservableCollection<Rectangle>();
+        private bool animationRunning = false;
+        private bool followCamera = false;
+        private (int x, int y) mainContainerPos = (0, 0);
+
+        private (int w, int h) mainContainerSize
+        {
+            get
+            {
+                return ((int)mainContainer.Width / cellSize, (int)mainContainer.Height / cellSize);
+            }
+        }
+
+        public MainWindow()
+        {
+            game = new GameOfLife();
+            factory = new CellFactory(() => cellSize, () => mainContainerSize);
+            //UpdateUI();
+            InitializeComponent();
+        }
+
+        private void UpdateUI()
         {
             if (followCamera)
             {
@@ -66,10 +58,14 @@ namespace PLANET_proj01
             }
             Title = baseTitle + " " + mainContainerPos.ToString();
             mainContainer.Children.Clear();
-            game.allCells.ForEach(c => mainContainer.Children.Add(factory.GetRectangle(c, mainContainerPos)));
+            game.allCells.ForEach(c =>
+            {
+                if (factory.IsWithinBounds(c))
+                    mainContainer.Children.Add(factory.GetRectangle(c, mainContainerPos));
+            });
         }
 
-        void Display()
+        public void Display()
         {
             game.DoTick();
             UpdateUI();
@@ -89,9 +85,10 @@ namespace PLANET_proj01
         {
             if (!animationRunning)
             {
+                var parameters = animateControls.Content as AnimateParamsTemplate;
                 animationRunning = true;
-                int count = int.Parse(times.Text);
-                int sleep = int.Parse(speed.Text);
+                int count = parameters.times;
+                int sleep = parameters.speed;
                 await Task.Run(() =>
                 {
                     for (int i = 0; count <= 0 || i < count; i++)
@@ -121,7 +118,7 @@ namespace PLANET_proj01
 
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
-            game = new GameOfLife(startPositions);
+            game = new GameOfLife();
             UpdateUI();
         }
 
@@ -141,8 +138,77 @@ namespace PLANET_proj01
             var pos = e.GetPosition(mainContainer);
             int x = (int)(pos.X / cellSize);
             int y = (int)(pos.Y / cellSize);
-            if(!game.allCells.Any(c => c.pos == (x, y)))
+            if (!game.allCells.Any(c => c.pos == (x, y)))
                 game.allCells.Add(new Cell() { pos = (x, y) });
+            UpdateUI();
+        }
+
+        private void GeneretePreset1(object sender, RoutedEventArgs e)
+        {
+            var startPositions = new List<(int x, int y)>()
+            {
+                (5,5),
+                (5,6),
+                (5,4),
+                (4,5),
+                (6,5)
+            };
+            game.AddCells(startPositions);
+            UpdateUI();
+        }
+
+        private void GenerateRandomCells(object sender, RoutedEventArgs e)
+        {
+            var startPositions = new List<(int x, int y)>();
+            var rand = new Random();
+            var numberOfAliveCells = (int)((mainContainerSize.w * mainContainerSize.h) * populationPercentage * rand.NextDouble());
+            for (int i = 0; i < numberOfAliveCells; i++)
+            {
+                (int x, int y) pos;
+                do
+                {
+                    pos = (x: rand.Next(mainContainerSize.w), y: rand.Next(mainContainerSize.h));
+                }
+                while (startPositions.Contains(pos));
+                startPositions.Add(pos);
+            }
+            game.AddCells(startPositions);
+            UpdateUI();
+        }
+
+        private void UpdateUI(object sender, TextChangedEventArgs e)
+        {
+            UpdateUI();
+        }
+        private void TurnHighlightOnOff(object sender, RoutedEventArgs e)
+        {
+            factory.ColorEndangered = !factory.ColorEndangered;
+            UpdateUI();
+        }
+        private void TurnColorOnOff(object sender, RoutedEventArgs e)
+        {
+            factory.ColorBorn = !factory.ColorBorn;
+            UpdateUI();
+        }
+
+        private void UpdateCondt(object sender, RoutedEventArgs e)
+        {
+            game.BornCondt = bornCondt.Text.Split(",").Select(s => int.Parse(s.Trim())).ToList();
+            game.DeadCondt = deadCondt.Text.Split(",").Select(s => int.Parse(s.Trim())).ToList();
+        }
+        private void SetCellRect(object sender, RoutedEventArgs e)
+        {
+            factory.Type = Type.Rect;
+            UpdateUI();
+        }
+        private void SetCellImg1(object sender, RoutedEventArgs e)
+        {
+            factory.Type = Type.Img1;
+            UpdateUI();
+        }
+        private void SetCellImg2(object sender, RoutedEventArgs e)
+        {
+            factory.Type = Type.Img2;
             UpdateUI();
         }
     }

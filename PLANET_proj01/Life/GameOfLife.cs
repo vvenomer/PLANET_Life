@@ -4,19 +4,26 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-
 namespace PLANET_proj01.Life
 {
-    class GameOfLife
+    internal class GameOfLife
     {
         public List<Cell> allCells = new List<Cell>();
+        public List<int> BornCondt = new List<int>() { 3 };
+        public List<int> DeadCondt = new List<int>() { 0, 1, 4, 5, 6, 7, 8 };
+
+        public GameOfLife()
+        {
+        }
 
         public GameOfLife(List<(int x, int y)> startingPositions)
         {
-            foreach (var pos in startingPositions)
-            {
-                allCells.Add(new Cell() { pos = (pos.x, pos.y) });
-            }
+            AddCells(startingPositions);
+        }
+
+        public void AddCells(List<(int x, int y)> startingPositions)
+        {
+            allCells = allCells.Concat(startingPositions.Select(pos => new Cell() { pos = (pos.x, pos.y) })).ToList();
         }
 
         public void DoTick()
@@ -24,7 +31,7 @@ namespace PLANET_proj01.Life
             var deadCells = new Dictionary<(int x, int y), Cell>();
             foreach (var cell in allCells)
             {
-                cell.ChangeState(allCells);
+                cell.ChangeState(allCells, BornCondt, DeadCondt);
                 foreach (var deadCell in cell.GetDeadCells())
                 {
                     deadCells.TryAdd(deadCell.pos, deadCell);
@@ -32,7 +39,7 @@ namespace PLANET_proj01.Life
             }
             foreach (var cell in deadCells)
             {
-                cell.Value.ChangeState(allCells);
+                cell.Value.ChangeState(allCells, BornCondt, DeadCondt);
             }
             var newCells = allCells.Concat(deadCells.Select(d => d.Value));
             foreach (var cell in newCells)
@@ -42,30 +49,33 @@ namespace PLANET_proj01.Life
             allCells = newCells.Where(c => c.state == CellState.Alive).ToList();
             foreach (var cell in allCells)
             {
-                cell.SetEndangeredState(allCells);
+                cell.SetEndangeredState(allCells, BornCondt, DeadCondt);
             }
         }
 
         public double DisplayAxisMiddleCoordinate(Func<(int x, int y), int> axis)
         {
-            return allCells.Average(c => axis(c.pos));
+            try
+            {
+                return allCells.Average(c => axis(c.pos));
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
         public void SaveState()
         {
             var json = JsonConvert.SerializeObject(allCells);
-            using (var writer = new StreamWriter("save.json"))
-            {
-                writer.WriteLine(json);
-            }
+            using var writer = new StreamWriter("save.json");
+            writer.WriteLine(json);
         }
 
         public void LoadState()
         {
-            using (var reader = new StreamReader("save.json"))
-            {
-                allCells = JsonConvert.DeserializeObject<List<Cell>>(reader.ReadToEnd());
-            }
+            using var reader = new StreamReader("save.json");
+            allCells = JsonConvert.DeserializeObject<List<Cell>>(reader.ReadToEnd());
         }
     }
 }

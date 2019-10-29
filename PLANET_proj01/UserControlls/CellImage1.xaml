@@ -1,0 +1,13 @@
+﻿<UserControl x:Class="PLANET_proj01.UserControlls.CellImage1"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PLANET_proj01.UserControlls"
+             mc:Ignorable="d">
+    <Grid>
+        <Rectangle Name="backgound"/>
+        <Image Source="https://www.giantmicrobes.com/ca/media/catalog/product/cache/8/small_image/9df78eab33525d08d6e5fb8d27136e95/a/n/animal-cell-top.jpg" Stretch="Uniform"/>
+    
+    </Grid>
+</UserControl>
