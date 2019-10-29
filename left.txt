@@ -1,0 +1,2 @@
+W aplikacji nalezy pokazac koncepcje komend, triggerow, animacji
+Mozna rozwazyc pewna parametryzacje regul (np. niesymetryczne sasiedztwo, ograniczony czas zycia komorki)
