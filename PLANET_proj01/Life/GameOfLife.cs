@@ -11,6 +11,7 @@ namespace PLANET_proj01.Life
         public List<Cell> allCells = new List<Cell>();
         public List<int> BornCondt = new List<int>() { 3 };
         public List<int> DeadCondt = new List<int>() { 0, 1, 4, 5, 6, 7, 8 };
+        public int dieWhenAliveFor = -1;
 
         public GameOfLife()
         {
@@ -29,9 +30,10 @@ namespace PLANET_proj01.Life
         public void DoTick()
         {
             var deadCells = new Dictionary<(int x, int y), Cell>();
+            allCells = allCells.Where(c => !c.died).ToList();
             foreach (var cell in allCells)
             {
-                cell.ChangeState(allCells, BornCondt, DeadCondt);
+                cell.ChangeState(allCells, BornCondt, DeadCondt, dieWhenAliveFor);
                 foreach (var deadCell in cell.GetDeadCells())
                 {
                     deadCells.TryAdd(deadCell.pos, deadCell);
@@ -39,19 +41,28 @@ namespace PLANET_proj01.Life
             }
             foreach (var cell in deadCells)
             {
-                cell.Value.ChangeState(allCells, BornCondt, DeadCondt);
+                cell.Value.ChangeState(allCells, BornCondt, DeadCondt, dieWhenAliveFor);
             }
             var newCells = allCells.Concat(deadCells.Select(d => d.Value));
             foreach (var cell in newCells)
             {
                 cell.UpdateState();
             }
-            allCells = newCells.Where(c => c.state == CellState.Alive).ToList();
+            allCells = newCells.Where(c => c.died || c.state == CellState.Alive).ToList();
             foreach (var cell in allCells)
             {
-                cell.SetEndangeredState(allCells, BornCondt, DeadCondt);
+                cell.SetEndangeredState(allCells, BornCondt, DeadCondt, dieWhenAliveFor);
             }
         }
+
+        public void SetEndangeredStates()
+        {
+            foreach (var cell in allCells)
+            {
+                cell.SetEndangeredState(allCells, BornCondt, DeadCondt, dieWhenAliveFor);
+            }
+        }
+
 
         public double DisplayAxisMiddleCoordinate(Func<(int x, int y), int> axis)
         {

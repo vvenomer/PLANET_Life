@@ -12,6 +12,13 @@
         <Style TargetType="Label">
             <Setter Property="FontFamily" Value="Times New Roman"/>
         </Style>
+        <Style TargetType="TextBox">
+            <Style.Triggers>
+                <Trigger Property="IsFocused" Value="True">
+                    <Setter Property="Background" Value="LightGray"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
         <DataTemplate DataType="{x:Type localTemplates:AnimateParamsTemplate}">
             <Grid>
                 <Label Content="{Binding timesText}" HorizontalAlignment="Left" Margin="10,66,0,0" VerticalAlignment="Top" />
@@ -21,8 +28,21 @@
                 <TextBox Name="speed" Text="{Binding speed}"  HorizontalAlignment="Left" Margin="10,140,0,0" VerticalAlignment="Top" Width="120" PreviewTextInput="MakeTextBoxNumberOnly" />
             </Grid>
         </DataTemplate>
+        <Storyboard x:Key="fadeOut">
+            <DoubleAnimation BeginTime="0:0:0.0" Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:0.2"/>
+            <ObjectAnimationUsingKeyFrames BeginTime="0:0:0.2" Storyboard.TargetProperty="Visibility">
+                <DiscreteObjectKeyFrame KeyTime="0">
+                    <DiscreteObjectKeyFrame.Value>
+                        <Visibility>Hidden</Visibility>
+                    </DiscreteObjectKeyFrame.Value>
+                </DiscreteObjectKeyFrame>
+            </ObjectAnimationUsingKeyFrames>
+        </Storyboard>
         <localTemplates:AnimateParamsTemplate x:Key="param" timesText="How many times:" times="0" speedText="How fast:" speed="100"/>
     </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.New" Executed="NewCommand_Executed" CanExecute="NewCommand_CanExec" />
+    </Window.CommandBindings>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
@@ -45,7 +65,7 @@
         </Menu>
         <Grid>
             <Grid Margin="200,0,0,0" Width="{Binding Path=Text, ElementName=width}" Height="{Binding Path=Text, ElementName=height}" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="1">
-                <Border BorderBrush="Black" BorderThickness="1"></Border>
+                <Border x:Name="gridBorder" BorderBrush="Black" BorderThickness="1"></Border>
                 <Grid Name="mainContainer" Width="{Binding Path=Text, ElementName=width}" Height="{Binding Path=Text, ElementName=height}" VerticalAlignment="Top" HorizontalAlignment="Right" Background="Transparent" PreviewMouseLeftButtonUp="SpawnCell">
                 </Grid>
             </Grid>
@@ -60,12 +80,17 @@
             <Button Name="Reset" Content="Reset" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="120" Height="25" Click="Reset_Click" Grid.ColumnSpan="2" />
             <TextBox Name="scale" HorizontalAlignment="Left" Margin="10,0,0,40" Text="25" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="120" Height="21" PreviewTextInput="MakeTextBoxNumberOnly" TextChanged="UpdateUI" />
             <Label Content="Scale" HorizontalAlignment="Left" Margin="11,0,0,61" VerticalAlignment="Bottom" Width="119" />
-            <TextBox Name="width" HorizontalAlignment="Left" Margin="11,361,0,0" Text="600" TextWrapping="Wrap" VerticalAlignment="Top" Width="59"  PreviewTextInput="MakeTextBoxNumberOnly" />
-            <TextBox Name="height" HorizontalAlignment="Left" Margin="70,361,0,0" Text="400" TextWrapping="Wrap" VerticalAlignment="Top" Width="59"  PreviewTextInput="MakeTextBoxNumberOnly" />
+            <TextBox Name="width" HorizontalAlignment="Left" Margin="11,361,0,0" Text="600" TextWrapping="Wrap" VerticalAlignment="Top" Width="59" PreviewTextInput="MakeTextBoxNumberOnly" />
+            <TextBox Name="height" HorizontalAlignment="Left" Margin="70,361,0,0" Text="400" TextWrapping="Wrap" VerticalAlignment="Top" Width="59" PreviewTextInput="MakeTextBoxNumberOnly" />
 
             <TextBox Name="bornCondt"  HorizontalAlignment="Left" Margin="71,193,0,0" Text="3" TextWrapping="Wrap" VerticalAlignment="Top" Width="60"/>
             <TextBox Name="deadCondt" HorizontalAlignment="Left" Margin="11,193,0,0" Text="0, 1, 4, 5, 6, 7, 8" TextWrapping="Wrap" VerticalAlignment="Top" Width="60"/>
             <Button Content="Update Conditions" HorizontalAlignment="Left" Margin="10,233,0,0" VerticalAlignment="Top" Width="119" Click="UpdateCondt"/>
+            <Button Command="ApplicationCommands.New" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,258,0,0" Width="119">
+                New
+            </Button>
+            <Label Content="Die after ticks:" Margin="11,283,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+            <TextBox Name="dieAfter" HorizontalAlignment="Left" Margin="10,306,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" PreviewTextInput="MakeTextBoxNumberOnly"  TextChanged="dieAfter_TextChanged" />
         </Grid>
     </DockPanel>
 </Window>

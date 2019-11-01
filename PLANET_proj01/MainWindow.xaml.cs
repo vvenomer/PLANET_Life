@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
 namespace PLANET_proj01
@@ -41,11 +42,21 @@ namespace PLANET_proj01
             }
         }
 
+        int dieWhenAliveFor
+        {
+            get
+            {
+                int res;
+                if (!int.TryParse(dieAfter.Text, out res))
+                    res = -1;
+                return res;
+            }
+        }
+
         public MainWindow()
         {
             game = new GameOfLife();
             factory = new CellFactory(() => cellSize, () => mainContainerSize);
-            //UpdateUI();
             InitializeComponent();
         }
 
@@ -58,10 +69,17 @@ namespace PLANET_proj01
             }
             Title = baseTitle + " " + mainContainerPos.ToString();
             mainContainer.Children.Clear();
+
             game.allCells.ForEach(c =>
             {
                 if (factory.IsWithinBounds(c))
-                    mainContainer.Children.Add(factory.GetRectangle(c, mainContainerPos));
+                {
+                    var rect = factory.GetRectangle(c, mainContainerPos);
+                    mainContainer.Children.Add(rect);
+
+                    if (c.died)
+                        (Resources["fadeOut"] as Storyboard).Begin(rect as FrameworkElement);
+                }
             });
         }
 
@@ -139,8 +157,10 @@ namespace PLANET_proj01
             int x = (int)(pos.X / cellSize);
             int y = (int)(pos.Y / cellSize);
             if (!game.allCells.Any(c => c.pos == (x, y)))
+            {
                 game.allCells.Add(new Cell() { pos = (x, y) });
-            UpdateUI();
+                UpdateUI();
+            }
         }
 
         private void GeneretePreset1(object sender, RoutedEventArgs e)
@@ -209,6 +229,27 @@ namespace PLANET_proj01
         private void SetCellImg2(object sender, RoutedEventArgs e)
         {
             factory.Type = Type.Img2;
+            UpdateUI();
+        }
+
+        Window2 window2;
+
+        private void NewCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            window2 = new Window2();
+            window2.Closed += (sender, args) => window2 = null;
+            window2.Show();
+        }
+
+        private void NewCommand_CanExec(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = window2 == null;
+        }
+
+        private void dieAfter_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            game.dieWhenAliveFor = dieWhenAliveFor;
+            game.SetEndangeredStates();
             UpdateUI();
         }
     }

@@ -7,6 +7,7 @@ namespace PLANET_proj01.Life
         public (int x, int y) pos { get; set; }
         public CellState state { get; private set; }
         public bool born { get; private set; } = true;
+        public bool died { get; private set; } = false;
         public bool endangered { get; private set; }
 
         private int alive = 0;
@@ -14,14 +15,12 @@ namespace PLANET_proj01.Life
 
         private CellState futureState;
 
-        private int dieWhenAliveFor = -1;
-
         public Cell()
         {
             state = CellState.Alive;
         }
 
-        public void ChangeState(IEnumerable<Cell> allCells, List<int> BornCondt, List<int> DeadCondt)
+        public void ChangeState(IEnumerable<Cell> allCells, List<int> BornCondt, List<int> DeadCondt, int dieWhenAliveFor)
         {
             var aliveNeighbours = SetNeighbours(allCells);
             if (state == CellState.Dead && BornCondt.Contains(aliveNeighbours))
@@ -39,9 +38,12 @@ namespace PLANET_proj01.Life
             if (state == CellState.Dead && futureState == CellState.Alive)
                 born = true;
             else born = false;
+            if (state == CellState.Alive && futureState == CellState.Dead)
+                died = true;
+            else died = false;
         }
 
-        public void SetEndangeredState(IEnumerable<Cell> allCells, List<int> BornCondt, List<int> DeadCondt)
+        public void SetEndangeredState(IEnumerable<Cell> allCells, List<int> BornCondt, List<int> DeadCondt, int dieWhenAliveFor)
         {
             var aliveNeighbours = SetNeighbours(allCells);
             if (state == CellState.Alive && (DeadCondt.Contains(aliveNeighbours) || dieWhenAliveFor == alive + 1))

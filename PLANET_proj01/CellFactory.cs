@@ -3,6 +3,7 @@ using PLANET_proj01.UserControlls;
 using System;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
 namespace PLANET_proj01
@@ -30,34 +31,35 @@ namespace PLANET_proj01
         public UIElement GetRectangle(Cell cell, (int x, int y) offset)
         {
             Rect rect;
-            switch(Type)
+            switch (Type)
             {
                 case Type.Img1:
-                    rect = (Rect)new CellImage1();
+                    rect = new CellImage1();
                     break;
                 case Type.Img2:
-                    rect = (Rect)new CellImage2();
+                    rect = new CellImage2();
                     break;
                 default:
-                    rect = (Rect)new myRect();
+                    rect = new myRect();
                     break;
             }
-            if (cell.state == CellState.Alive)
-            {
-                if (ColorBorn && cell.born)
-                    rect.Fill = new SolidColorBrush(Colors.Green);
-                else
-                    rect.Fill = new SolidColorBrush(Colors.Blue);
 
-                if (ColorEndangered && cell.endangered)
-                {
-                    rect.Stroke = new SolidColorBrush(Colors.Red);
-                    rect.StrokeThickness = 2;
-                }
+            if (ColorBorn && cell.born)
+                rect.Fill = new SolidColorBrush(Colors.Green);
+            else if(cell.died)
+                rect.Fill = new SolidColorBrush(Colors.Black);
+            else
+                rect.Fill = new SolidColorBrush(Colors.Blue);
+
+            if (ColorEndangered && cell.endangered)
+            {
+                rect.Stroke = new SolidColorBrush(Colors.Red);
+                rect.StrokeThickness = 2;
             }
+
             int scale = GetScale();
             rect.Width = rect.Height = scale;
-
+            rect.Visibility = Visibility.Visible;
             rect.Margin = new Thickness(cell.pos.x * scale + offset.x, cell.pos.y * scale + offset.y, 0, 0);
 
             rect.HorizontalAlignment = HorizontalAlignment.Left;
@@ -79,6 +81,9 @@ namespace PLANET_proj01
         public Thickness Margin { set => Rectangle.Margin = value; }
         public HorizontalAlignment HorizontalAlignment { set => Rectangle.HorizontalAlignment = value; }
         public VerticalAlignment VerticalAlignment { set => Rectangle.VerticalAlignment = value; }
+
+        public Visibility Visibility { set => Rectangle.Visibility = value; }
+
         public UIElement GetMe()
         {
             return Rectangle;
@@ -101,6 +106,7 @@ namespace PLANET_proj01
         Thickness Margin { set; }
         HorizontalAlignment HorizontalAlignment { set; }
         VerticalAlignment VerticalAlignment { set; }
+        Visibility Visibility { set; }
         UIElement GetMe();
     }
 }
